@@ -10,7 +10,7 @@ using UglyToad.PdfPig.Writer;
 
 namespace Raydreams.PDF
 {
-    public static class Program
+    public class Program
     {
         /// <summary>Path to the user's desktop folder</summary>
         public static readonly string DesktopPath = Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory );
@@ -22,30 +22,51 @@ namespace Raydreams.PDF
         /// <returns>exit value</returns>
         public static int Main( string[] args )
         {
+            Program app = new Program();
+            app.Run( "Facesheets-5.pdf" );
+
+            return 0;
+        }
+
+        public void Run(string facesheet)
+        {
             Console.WriteLine( "Starting..." );
 
             // get the environment var
             string env = Environment.GetEnvironmentVariable( "ASPNETCORE_ENVIRONMENT" ) ?? "Development";
 
-            using PdfDocument document = PdfDocument.Open( Path.Combine( BasePath, "Facesheets-5.pdf" ) );
-
-            PatientInfo? curPatient = null;
+            using PdfDocument document = PdfDocument.Open( Path.Combine( BasePath, facesheet ) );
 
             List<PatientInfo> patients = new List<PatientInfo>();
 
             // 1 indexed
             int curPageNum = 1;
 
+            // page 1 should always be a new Patient Header
+            Page page = document.GetPage( curPageNum++ );
+
+            // get all the lines on this page
+            var pageLines = ExtractPageLines( page );
+
+            // does this page start a new patient
+            PatientInfo? curPatient = Parse( pageLines );
+
+            if ( curPatient == null )
+            {
+                Console.WriteLine( "PDF doesn't start on a new patient" );
+                return;
+            }
+
             while ( curPageNum <= document.NumberOfPages )
             {
                 // get the current page
-                Page page = document.GetPage( curPageNum );
+                page = document.GetPage( curPageNum );
 
                 // get all the lines on this page
-                var pageLines = ExtractPageLines( page );
+                pageLines = ExtractPageLines( page );
 
                 // does this page start a new patient
-                PatientInfo? nextPatient = IsStart( pageLines );
+                PatientInfo? nextPatient = Parse( pageLines );
 
                 // starting a new patient
                 if ( nextPatient != null )
@@ -54,14 +75,7 @@ namespace Raydreams.PDF
                     if ( curPatient != null )
                         patients.Add( curPatient );
 
-                    //currentPages.Clear();
                     curPatient = nextPatient;
-                }
-                // PDF doesn't start on a new patient
-                else if ( curPageNum == 1 )
-                {
-                    Console.WriteLine( "PDF doesn't start on a new patient" );
-                    break;
                 }
 
                 // queue this page
@@ -78,14 +92,12 @@ namespace Raydreams.PDF
             }
 
             Console.WriteLine( "Stopping..." );
-
-            return 0;
         }
 
         /// <summary></summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        public static List<string> ExtractPageLines( Page page )
+        public List<string> ExtractPageLines( Page page )
         {
             List<string> lines = new List<string>();
             var sb = new StringBuilder();
@@ -161,13 +173,13 @@ namespace Raydreams.PDF
         /// <summary></summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public static PatientInfo? IsStart( List<string> lines )
+        public PatientInfo? Parse( List<string> lines )
         {
-            Regex regex = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+            Regex namePat = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
 
             foreach ( string line in lines )
             {
-                Match match = regex.Match( line.Trim() );
+                Match match = namePat.Match( line.Trim() );
 
                 if ( match.Success && match.Groups.Count > 1 )
                 {
@@ -182,7 +194,7 @@ namespace Raydreams.PDF
         /// <param name="pdf"></param>
         /// <param name="filename"></param>
         /// <param name="pages"></param>
-        public static void WriteFacesheet( PdfDocument pdf, string filename, params int[] pages )
+        public void WriteFacesheet( PdfDocument pdf, string filename, params int[] pages )
         {
             if ( pdf == null || pages.Length < 1 )
                 return;
