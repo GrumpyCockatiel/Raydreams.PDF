@@ -33,23 +33,23 @@ namespace Raydreams.PDF
 
             List<PatientInfo> patients = new List<PatientInfo>();
 
+            // 1 indexed
             int curPageNum = 1;
 
             while ( curPageNum <= document.NumberOfPages )
             {
+                // get the current page
                 Page page = document.GetPage( curPageNum );
 
+                // get all the lines on this page
                 var pageLines = ExtractPageLines( page );
 
+                // does this page start a new patient
                 PatientInfo? nextPatient = IsStart( pageLines );
 
-                // start a new patient
+                // starting a new patient
                 if ( nextPatient != null )
                 {
-                    // if queue not empty - write out new PDF
-                    //if ( currentPages.Count > 0 )
-                    //WriteFacesheet( document, curPatient?.LastName, currentPages.ToArray() );
-
                     // remember the previous patient
                     if ( curPatient != null )
                         patients.Add( curPatient );
@@ -76,34 +76,6 @@ namespace Raydreams.PDF
             {
                 WriteFacesheet( document, p.LastName, p.Pages.ToArray() );
             }
-
-            //// 1 indexed
-            //for ( int p = 1; p <= document.NumberOfPages; ++p )
-            //{
-            //    Page page = document.GetPage( p );
-
-            //    var pageLines = ExtractPageLines( page );
-
-            //    PatientInfo? nextPatient = IsStart( pageLines );
-
-            //    // start a new patient
-            //    if ( nextPatient != null )
-            //    {
-            //        // if queue not empty - write out new PDF
-            //        if ( currentPages.Count > 0 )
-            //            WriteFacesheet( document, curPatient?.LastName, currentPages.ToArray() );
-
-            //        currentPages.Clear();
-            //        curPatient = nextPatient;
-            //    }
-
-            //    // queue this page
-            //    currentPages.Enqueue( p );
-            //}
-
-            //// write the last facesheet
-            //if ( currentPages.Count > 0 )
-            //    WriteFacesheet( document, curPatient?.LastName, currentPages.ToArray() );
 
             Console.WriteLine( "Stopping..." );
 
@@ -217,9 +189,9 @@ namespace Raydreams.PDF
 
             // need a better default
             if ( String.IsNullOrWhiteSpace( filename ) )
-                filename = $"facesheet-{DateTimeOffset.UtcNow:yyyy-MM-dd}";
-
-            filename = filename.Trim().Replace(',', '-');
+                filename = $"facesheet-{String.Join( String.Empty, pages )}";
+            else
+                filename = filename.Trim().Replace(',', '-');
 
             var builder = new PdfDocumentBuilder();
             Array.ForEach( pages, p => builder.AddPage( pdf, p ) );
@@ -227,21 +199,9 @@ namespace Raydreams.PDF
             var fileBytes = builder.Build();
             var output = Path.Combine(BasePath, $"{filename}.pdf" );
             File.WriteAllBytes( output, fileBytes );
+
+            Console.WriteLine( $"Wrote Facesheet for {filename}" );
         }
 
     }
 }
-
-
-
-//var documentText = new StringBuilder();
-//using var pdf = new PdfDocument( Path.Combine( DesktopPath, "Facesheets.pdf" ) );
-
-//foreach (PdfPage page in pdf.Pages)
-//{
-//    string searchableText = page.GetText();
-//    // if contains Patient - start of document
-//    // keep reading until next Patient
-//}
-
-//using PdfDocument extracted = pdf.ExtractPages( 0, 3 );
