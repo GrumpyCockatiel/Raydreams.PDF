@@ -2,6 +2,13 @@
 
 namespace Raydreams.PDF
 {
+    public enum Facility
+    {
+        Unknown = 0,
+        MemorialHermann = 1,
+        Cornerstone = 2
+    }
+
     public class PatientInfo
     {
         /// <summary></summary>
@@ -24,6 +31,8 @@ namespace Raydreams.PDF
             }
         }
 
+        public bool IsValid => !String.IsNullOrWhiteSpace( this.LastName ) && this.Location != Facility.Unknown;
+
         /// <summary></summary>
         public string FirstName { get; set; } = String.Empty;
 
@@ -33,6 +42,10 @@ namespace Raydreams.PDF
         /// <summary></summary>
         public DateTimeOffset? DOB { get; set; } = null;
 
+        /// <summary></summary>
+        public Facility Location { get; set; } = Facility.Unknown;
+
+        /// <summary></summary>
         public Queue<int> Pages { get; set; } = new Queue<int>();
     }
 }

@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.DocumentLayoutAnalysis;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
@@ -15,6 +16,7 @@ namespace Raydreams.PDF
         /// <summary>Path to the user's desktop folder</summary>
         public static readonly string DesktopPath = Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory );
 
+        /// <summary></summary>
         public static readonly string BasePath = Path.Combine( DesktopPath, "Facesheets" );
 
         /// <summary>Main entry class</summary>
@@ -28,10 +30,8 @@ namespace Raydreams.PDF
             return 0;
         }
 
-        public void Run(string facesheet)
+        public void Run( string facesheet )
         {
-            Console.WriteLine( "Starting..." );
-
             // get the environment var
             string env = Environment.GetEnvironmentVariable( "ASPNETCORE_ENVIRONMENT" ) ?? "Development";
 
@@ -42,40 +42,26 @@ namespace Raydreams.PDF
             // 1 indexed
             int curPageNum = 1;
 
-            // page 1 should always be a new Patient Header
-            Page page = document.GetPage( curPageNum++ );
+            // hold a ref to the current patient
+            PatientInfo? curPatient = null;
 
-            // get all the lines on this page
-            var pageLines = ExtractPageLines( page );
-
-            // does this page start a new patient
-            PatientInfo? curPatient = Parse( pageLines );
-
-            if ( curPatient == null )
-            {
-                Console.WriteLine( "PDF doesn't start on a new patient" );
-                return;
-            }
-
-            while ( curPageNum <= document.NumberOfPages )
+            do
             {
                 // get the current page
-                page = document.GetPage( curPageNum );
+                Page? page = document.GetPage( curPageNum );
 
-                // get all the lines on this page
-                pageLines = ExtractPageLines( page );
+                Facility type = PageProcessorFactory.Detect( page );
 
-                // does this page start a new patient
-                PatientInfo? nextPatient = Parse( pageLines );
+                IPageProcessor parser = PageProcessorFactory.MakeProcessor( page, type );
 
                 // starting a new patient
-                if ( nextPatient != null )
+                if ( type != Facility.Unknown )
                 {
                     // remember the previous patient
                     if ( curPatient != null )
                         patients.Add( curPatient );
 
-                    curPatient = nextPatient;
+                    curPatient = new PatientInfo { Name = parser.ExtractName() };
                 }
 
                 // queue this page
@@ -83,112 +69,181 @@ namespace Raydreams.PDF
                     curPatient.Pages.Enqueue( curPageNum );
 
                 ++curPageNum;
-            }
+
+            } while ( curPageNum <= document.NumberOfPages );
+
+            // add the last patient
+            if ( curPatient != null )
+                patients.Add( curPatient );
 
             // write out all the facesheets
-            foreach ( PatientInfo p in patients )
-            {
-                WriteFacesheet( document, p.LastName, p.Pages.ToArray() );
-            }
+            patients.ForEach( p => WriteFacesheet( document, p.LastName, p.Pages.ToArray() ) );
 
             Console.WriteLine( "Stopping..." );
+
         }
+
+        /// <summary></summary>
+        /// <param name="facesheet"></param>
+        //public void Run( string facesheet )
+        //{
+        //    Console.WriteLine( "Starting..." );
+
+        //    // get the environment var
+        //    string env = Environment.GetEnvironmentVariable( "ASPNETCORE_ENVIRONMENT" ) ?? "Development";
+
+        //    using PdfDocument document = PdfDocument.Open( Path.Combine( BasePath, facesheet ) );
+
+        //    List<PatientInfo> patients = new List<PatientInfo>();
+
+        //    // 1 indexed
+        //    int curPageNum = 1;
+
+        //    // hold a ref to the current patient
+        //    PatientInfo? curPatient = null;
+
+        //    do
+        //    {
+        //        // get the current page
+        //        Page? page = document.GetPage( curPageNum );
+
+        //        // get all the lines on this page
+        //        var pageLines = ExtractPageLines( page );
+
+        //        // does this page start a new patient
+        //        PatientInfo nextPatient = ParsePage( pageLines );
+
+        //        // starting a new patient
+        //        if ( nextPatient.IsValid )
+        //        {
+        //            // remember the previous patient
+        //            if ( curPatient != null )
+        //                patients.Add( curPatient );
+
+        //            curPatient = nextPatient;
+        //        }
+
+        //        // queue this page
+        //        if ( curPatient != null )
+        //            curPatient.Pages.Enqueue( curPageNum );
+
+        //        ++curPageNum;
+
+        //    } while ( curPageNum <= document.NumberOfPages );
+
+        //    // write out all the facesheets
+        //    foreach ( PatientInfo p in patients )
+        //    {
+        //        WriteFacesheet( document, p.LastName, p.Pages.ToArray() );
+        //    }
+
+        //    Console.WriteLine( "Stopping..." );
+        //}
 
         /// <summary></summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        public List<string> ExtractPageLines( Page page )
-        {
-            List<string> lines = new List<string>();
-            var sb = new StringBuilder();
+        //public List<string> ExtractPageLines( Page page )
+        //{
+        //    List<string> lines = new List<string>();
+        //    var sb = new StringBuilder();
 
-            // 0. Preprocessing
-            var letters = page.Letters; // no preprocessing
+        //    // 0. Preprocessing
+        //    var letters = page.Letters; // no preprocessing
 
-            // 1. Extract words
-            var wordExtractor = NearestNeighbourWordExtractor.Instance;
+        //    // 1. Extract words
+        //    var wordExtractor = NearestNeighbourWordExtractor.Instance;
             
-            var wordExtractorOptions = new NearestNeighbourWordExtractor.NearestNeighbourWordExtractorOptions()
-            {
-                Filter = ( pivot, candidate ) =>
-                {
-                    // check if white space (default implementation of 'Filter')
-                    if ( string.IsNullOrWhiteSpace( candidate.Value ) )
-                    {
-                        // pivot and candidate letters cannot belong to the same word 
-                        // if candidate letter is null or white space.
-                        // ('FilterPivot' already checks if the pivot is null or white space by default)
-                        return false;
-                    }
+        //    var wordExtractorOptions = new NearestNeighbourWordExtractor.NearestNeighbourWordExtractorOptions()
+        //    {
+        //        Filter = ( pivot, candidate ) =>
+        //        {
+        //            // check if white space (default implementation of 'Filter')
+        //            if ( string.IsNullOrWhiteSpace( candidate.Value ) )
+        //            {
+        //                // pivot and candidate letters cannot belong to the same word 
+        //                // if candidate letter is null or white space.
+        //                // ('FilterPivot' already checks if the pivot is null or white space by default)
+        //                return false;
+        //            }
 
-                    // check for height difference
-                    var maxHeight = Math.Max( pivot.PointSize, candidate.PointSize );
-                    var minHeight = Math.Min( pivot.PointSize, candidate.PointSize );
-                    if ( minHeight != 0 && maxHeight / minHeight > 2.0 )
-                    {
-                        // pivot and candidate letters cannot belong to the same word 
-                        // if one letter is more than twice the size of the other.
-                        return false;
-                    }
+        //            // check for height difference
+        //            var maxHeight = Math.Max( pivot.PointSize, candidate.PointSize );
+        //            var minHeight = Math.Min( pivot.PointSize, candidate.PointSize );
 
-                    // check for colour difference
-                    var pivotRgb = pivot.Color.ToRGBValues();
-                    var candidateRgb = candidate.Color.ToRGBValues();
-                    if ( !pivotRgb.Equals( candidateRgb ) )
-                    {
-                        // pivot and candidate letters cannot belong to the same word 
-                        // if they don't have the same colour.
-                        return false;
-                    }
+        //            if ( minHeight != 0 && maxHeight / minHeight > 2.0 )
+        //            {
+        //                // pivot and candidate letters cannot belong to the same word 
+        //                // if one letter is more than twice the size of the other.
+        //                return false;
+        //            }
 
-                    return true;
-                }
-            };
+        //            // check for colour difference
+        //            var pivotRgb = pivot.Color.ToRGBValues();
 
-            var words = wordExtractor.GetWords( letters );
+        //            var candidateRgb = candidate.Color.ToRGBValues();
 
-            // 2. Segment page
-            var pageSegmenter = DocstrumBoundingBoxes.Instance;
-            var pageSegmenterOptions = new DocstrumBoundingBoxes.DocstrumBoundingBoxesOptions() { };
+        //            if ( !pivotRgb.Equals( candidateRgb ) )
+        //            {
+        //                // pivot and candidate letters cannot belong to the same word 
+        //                // if they don't have the same colour.
+        //                return false;
+        //            }
 
-            var textBlocks = pageSegmenter.GetBlocks( words );
+        //            return true;
+        //        }
+        //    };
 
-            // 3. Postprocessing
-            var readingOrder = UnsupervisedReadingOrderDetector.Instance;
-            var orderedTextBlocks = readingOrder.Get( textBlocks );
+        //    // get all the words using the filters
+        //    var words = wordExtractor.GetWords( letters );
 
-            // 4. Extract text
-            foreach ( var block in orderedTextBlocks )
-            {
-                sb.Append( block.Text.Normalize( NormalizationForm.FormKC ) ); // normalise text
-                sb.AppendLine();
+        //    // 2. Segment page
+        //    var pageSegmenter = DocstrumBoundingBoxes.Instance;
+        //    var pageSegmenterOptions = new DocstrumBoundingBoxes.DocstrumBoundingBoxesOptions() { };
 
-                lines.Add( block.Text.Normalize( NormalizationForm.FormKC ) );
-            }
+        //    IReadOnlyList<TextBlock> textBlocks = pageSegmenter.GetBlocks( words );
 
-            //return sb.ToString();
-            return lines;
-        }
+        //    // 3. Postprocessing
+        //    var readingOrder = UnsupervisedReadingOrderDetector.Instance;
+        //    IEnumerable<TextBlock> orderedTextBlocks = readingOrder.Get( textBlocks );
+
+        //    // 4. Extract text
+        //    foreach ( var block in orderedTextBlocks )
+        //    {
+        //        sb.Append( block.Text.Normalize( NormalizationForm.FormKC ) ); // normalise text
+        //        sb.AppendLine();
+
+        //        lines.Add( block.Text.Normalize( NormalizationForm.FormKC ) );
+        //    }
+
+        //    //return sb.ToString();
+        //    return lines;
+        //}
 
         /// <summary></summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public PatientInfo? Parse( List<string> lines )
-        {
-            Regex namePat = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+        //public PatientInfo ParsePage( List<string> lines )
+        //{
+        //    Regex namePat = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
 
-            foreach ( string line in lines )
-            {
-                Match match = namePat.Match( line.Trim() );
+        //    PatientInfo patient = new PatientInfo();
 
-                if ( match.Success && match.Groups.Count > 1 )
-                {
-                    return new PatientInfo { Name = match.Groups[1].Value };
-                }
-            }
+        //    foreach ( string line in lines )
+        //    {
+        //        Match nameMatch = namePat.Match( line.Trim() );
 
-            return null;
-        }
+        //        if ( nameMatch.Success && nameMatch.Groups.Count > 1 )
+        //            patient.Name = nameMatch.Groups[1].Value;
+
+        //        if ( line.Contains( "cornerstone", StringComparison.InvariantCultureIgnoreCase ) )
+        //            patient.Location = Facility.Cornerstone;
+        //        else if ( line.Contains( "memorial", StringComparison.InvariantCultureIgnoreCase ) )
+        //            patient.Location = Facility.MemorialHermann;
+        //    }
+
+        //    return patient;
+        //}
 
         /// <summary></summary>
         /// <param name="pdf"></param>
