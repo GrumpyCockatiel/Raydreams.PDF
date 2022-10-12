@@ -1,14 +1,6 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.Core;
 using UglyToad.PdfPig.DocumentLayoutAnalysis;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 
 namespace Raydreams.PDF
 {
@@ -146,7 +138,7 @@ namespace Raydreams.PDF
                 Match match = pattern.Match( line.Trim() );
 
                 if ( match.Success && match.Groups.Count > 1 )
-                    return match.Groups[1].Value.GetSex();
+                    return match.Groups[1].Value.ParseSex();
             }
 
             return Sex.Undetermined;

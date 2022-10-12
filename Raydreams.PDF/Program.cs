@@ -1,12 +1,5 @@
-﻿using System.Reflection.Metadata;
-using System.Text;
-using System.Text.RegularExpressions;
-using UglyToad.PdfPig;
+﻿using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.DocumentLayoutAnalysis;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using UglyToad.PdfPig.Writer;
 
 namespace Raydreams.PDF
@@ -19,6 +12,7 @@ namespace Raydreams.PDF
         /// <summary></summary>
         public static readonly string BasePath = Path.Combine( DesktopPath, "Facesheets" );
 
+        /// <summary>Array of filenames to process</summary>
         public static readonly string[] Facesheets = new string[] { "Facesheets-5.pdf" };
 
         /// <summary>Main entry class</summary>
@@ -34,19 +28,28 @@ namespace Raydreams.PDF
             Console.WriteLine( "Starting..." );
 
             foreach ( string facesheet in Facesheets )
-                app.Run( facesheet );
-
+            {
+                try
+                {
+                    app.Process( facesheet );
+                }
+                catch ( System.Exception exp )
+                {
+                    Console.WriteLine( exp.Message );
+                }
+            }
+                
             Console.WriteLine( "Stopping..." );
 
             return 0;
         }
 
-        /// <summary></summary>
+        /// <summary>Process a single PDF of multiple facesheets</summary>
         /// <param name="facesheet"></param>
-        public int Run( string facesheet )
+        public int Process( string facesheet )
         {
             FileInfo path = new FileInfo( Path.Combine( BasePath, facesheet ) );
-            if ( !path.Exists )
+            if ( !path.Exists || !path.Extension.Equals(".pdf", StringComparison.InvariantCultureIgnoreCase) )
                 return 0;
 
             using PdfDocument document = PdfDocument.Open( path.FullName );
@@ -75,6 +78,7 @@ namespace Raydreams.PDF
                     if ( curPatient != null )
                         patients.Add( curPatient );
 
+                    // start a new patient
                     curPatient = new PatientInfo
                     {
                         Name = parser.ExtractName(),
@@ -82,7 +86,6 @@ namespace Raydreams.PDF
                         Sex = parser.ExtractSex(),
                         Location = type
                     };
-                    _ = 5;
                 }
                 else if ( curPageNum < 2)
                 {
@@ -109,7 +112,7 @@ namespace Raydreams.PDF
             return writes;
         }
 
-        /// <summary></summary>
+        /// <summary>Write out a single facesheet</summary>
         /// <param name="pdf"></param>
         /// <param name="filename"></param>
         /// <param name="pages"></param>

@@ -6,13 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="PdfSharp" />
-    <None Remove="Tesseract" />
-    <None Remove="BitMiracle.Docotic.Pdf" />
-    <None Remove="PdfPig" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PdfPig" Version="0.1.6" />
   </ItemGroup>

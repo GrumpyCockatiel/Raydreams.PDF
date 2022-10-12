@@ -6,11 +6,11 @@ namespace Raydreams.PDF
     /// <summary>Utility String Extensions</summary>
     public static class StringExtensions
     {
-        /// <summary>Converts a string to an enum value of enum T failing to default(T)</summary>
+        /// <summary></summary>
         /// <param name="ignoreCase">Ignore case by default</param>
         /// <returns></returns>
         /// <remarks>Case is ignored</remarks>
-        public static Sex GetSex( this string value )
+        public static Sex ParseSex( this string value )
         {
             if ( String.IsNullOrWhiteSpace( value ) )
                 return default;

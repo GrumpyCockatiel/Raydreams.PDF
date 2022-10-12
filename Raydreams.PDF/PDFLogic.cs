@@ -1,5 +1,4 @@
-﻿using System;
-using UglyToad.PdfPig.Core;
+﻿using UglyToad.PdfPig.Core;
 using UglyToad.PdfPig.DocumentLayoutAnalysis;
 
 namespace Raydreams.PDF
@@ -25,20 +24,18 @@ namespace Raydreams.PDF
             all = all.Where( b => b.BoundingBox.Bottom < box.BoundingBox.Bottom && b.BoundingBox.Top < box.BoundingBox.Bottom ).OrderByDescending( b => b.BoundingBox.Top ).ToList();
 
             // init with a block that's far away
-            TextBlock closets = all.Last();
+            ( TextBlock Block, double Dist) closest = ( all.Last(), box.BoundingBox.TopLeft.GetDistance( all.Last().BoundingBox.TopLeft ) );
 
             foreach ( TextBlock b in all )
             {
-                // dont recalc each time - save this
-                double c = box.BoundingBox.TopLeft.GetDistance( closets.BoundingBox.TopLeft );
-
+                // distance to box we are testing
                 double n = box.BoundingBox.TopLeft.GetDistance( b.BoundingBox.TopLeft );
 
-                if ( n < c )
-                    closets = b;
+                if ( n < closest.Dist )
+                    closest = ( b, n);
             }
 
-            return closets;
+            return closest.Block;
         }
 
         /// <summary>Get the distance between two double points</summary>
