@@ -8,15 +8,12 @@ using UglyToad.PdfPig.DocumentLayoutAnalysis;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
-using static UglyToad.PdfPig.Core.PdfSubpath;
 
 namespace Raydreams.PDF
 {
     /// <summary></summary>
     public interface IPageProcessor
     {
-        bool IsStart();
-
         string? ExtractName();
 
         DateTimeOffset? ExtractDOB();
@@ -154,11 +151,6 @@ namespace Raydreams.PDF
         {
         }
 
-        public bool IsStart()
-        {
-            return false;
-        }
-
         public DateTimeOffset? ExtractDOB()
         {
             throw new NotImplementedException();
@@ -180,11 +172,6 @@ namespace Raydreams.PDF
     {
         public MHPageProcessor( IEnumerable<TextBlock> txt ) : base( txt )
         {
-        }
-
-        public bool IsStart()
-        {
-            return false;
         }
 
         public DateTimeOffset? ExtractDOB()
@@ -218,12 +205,7 @@ namespace Raydreams.PDF
 
         public string? ExtractName()
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsStart()
-        {
-            throw new NotImplementedException();
+            return String.Empty;
         }
     }
 }

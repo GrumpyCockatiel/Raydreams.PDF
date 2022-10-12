@@ -2,6 +2,7 @@
 
 namespace Raydreams.PDF
 {
+    /// <summary>Medical Facility enum</summary>
     public enum Facility
     {
         Unknown = 0,
@@ -9,10 +10,11 @@ namespace Raydreams.PDF
         Cornerstone = 2
     }
 
+    /// <summary></summary>
     public class PatientInfo
     {
         /// <summary></summary>
-        public string Name
+        public string? Name
         {
             set
             {

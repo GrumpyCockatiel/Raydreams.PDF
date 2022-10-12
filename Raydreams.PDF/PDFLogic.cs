@@ -7,7 +7,7 @@ namespace Raydreams.PDF
     /// <summary></summary>
     public static class PDFLogic
     {
-        /// <summary></summary>
+        /// <summary>Is the given point inside the text block</summary>
         public static bool PointInBlock( this TextBlock box, PdfPoint pt )
         {
             if ( pt.X < box.BoundingBox.Left || pt.X > box.BoundingBox.Right )
@@ -16,7 +16,7 @@ namespace Raydreams.PDF
             return ( pt.Y < box.BoundingBox.Bottom || pt.Y > box.BoundingBox.Top );
         }
 
-        /// <summary></summary>
+        /// <summary>Find the text block that is most likely to be just below and left justified</summary>
         public static TextBlock? JustUnder( this TextBlock box, List<TextBlock> all )
         {
             all.Remove( box );
@@ -24,11 +24,12 @@ namespace Raydreams.PDF
             // only those below ordered top to bottom
             all = all.Where( b => b.BoundingBox.Bottom < box.BoundingBox.Bottom && b.BoundingBox.Top < box.BoundingBox.Bottom ).OrderByDescending( b => b.BoundingBox.Top ).ToList();
 
+            // init with a block that's far away
             TextBlock closets = all.Last();
 
             foreach ( TextBlock b in all )
             {
-                // dont recalc each time - save
+                // dont recalc each time - save this
                 double c = box.BoundingBox.TopLeft.GetDistance( closets.BoundingBox.TopLeft );
 
                 double n = box.BoundingBox.TopLeft.GetDistance( b.BoundingBox.TopLeft );
@@ -40,7 +41,7 @@ namespace Raydreams.PDF
             return closets;
         }
 
-        /// <summary></summary>
+        /// <summary>Get the distance between two double points</summary>
         /// <param name="pt1"></param>
         /// <param name="pt2"></param>
         /// <returns></returns>
