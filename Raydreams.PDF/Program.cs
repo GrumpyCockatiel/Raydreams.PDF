@@ -19,7 +19,7 @@ namespace Raydreams.PDF
         /// <summary></summary>
         public static readonly string BasePath = Path.Combine( DesktopPath, "Facesheets" );
 
-        public static readonly string[] Facesheets = new string[] { "Facesheets-6.pdf" };
+        public static readonly string[] Facesheets = new string[] { "Facesheets-5.pdf" };
 
         /// <summary>Main entry class</summary>
         /// <param name="args">any future command line args</param>
@@ -75,7 +75,13 @@ namespace Raydreams.PDF
                     if ( curPatient != null )
                         patients.Add( curPatient );
 
-                    curPatient = new PatientInfo { Name = parser.ExtractName(), DOB = parser.ExtractDOB(), Location = type  };
+                    curPatient = new PatientInfo
+                    {
+                        Name = parser.ExtractName(),
+                        DOB = parser.ExtractDOB(),
+                        Sex = parser.ExtractSex(),
+                        Location = type
+                    };
                     _ = 5;
                 }
                 else if ( curPageNum < 2)

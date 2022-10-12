@@ -10,6 +10,14 @@ namespace Raydreams.PDF
         Cornerstone = 2
     }
 
+    /// <summary>Patient Genetic Sex</summary>
+    public enum Sex
+    {
+        Undetermined = 0,
+        Female = 1,
+        Male = 2
+    }
+
     /// <summary></summary>
     public class PatientInfo
     {
@@ -43,6 +51,9 @@ namespace Raydreams.PDF
 
         /// <summary></summary>
         public DateTime? DOB { get; set; } = null;
+
+        /// <summary></summary>
+        public Sex Sex { get; set; } = Sex.Undetermined;
 
         /// <summary></summary>
         public Facility Location { get; set; } = Facility.Unknown;
