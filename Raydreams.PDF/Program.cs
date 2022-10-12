@@ -31,7 +31,7 @@ namespace Raydreams.PDF
             {
                 try
                 {
-                    app.Process( facesheet );
+                    _ = app.Process( facesheet );
                 }
                 catch ( System.Exception exp )
                 {
@@ -108,7 +108,11 @@ namespace Raydreams.PDF
 
             // write out all the facesheets
             int writes = 0;
-            patients.ForEach( (p) => { WriteFacesheet( document, p.LastName, p.Pages.ToArray() ); ++writes; } );
+            patients.ForEach( ( p ) =>
+            {
+                WriteFacesheet( document, p.LastName, p.Pages.ToArray() );
+                ++writes;
+            } );
             return writes;
         }
 

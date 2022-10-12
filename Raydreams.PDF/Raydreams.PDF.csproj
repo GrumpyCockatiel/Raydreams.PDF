@@ -9,4 +9,12 @@
   <ItemGroup>
     <PackageReference Include="PdfPig" Version="0.1.6" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Logic\" />
+    <None Remove="Model\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Logic\" />
+    <Folder Include="Model\" />
+  </ItemGroup>
 </Project>

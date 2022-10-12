@@ -14,7 +14,16 @@ Medical staff often print out Patient Facesheets at different facilities and the
 
 Still a Work in Progress
 
-Uses Ugly Toad's [PDF Pig](https://github.com/UglyToad/PdfPig) to parse PDFs.
+Uses Ugly Toad's (free) [PDF Pig](https://github.com/UglyToad/PdfPig) to parse PDFs.
+
+Other open source PDF libs include:
+
+* iTextSharp
+
+Other commerical PDF libs include:
+
+* BitMiracle
+* Aspose.PDF
 
 ## App Configuration
 

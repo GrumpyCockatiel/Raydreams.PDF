@@ -69,7 +69,7 @@ namespace Raydreams.PDF
             // find the label text block
             var pBlock = blocks.Where( b => b.Text.Trim().Equals( "patient", StringComparison.InvariantCultureIgnoreCase ) );
 
-            // find the closet text block that comes after
+            // find the closet text block that is just below
             TextBlock? nameBlock = pBlock.First().JustUnder( this.blocks );
 
             return nameBlock?.Text;

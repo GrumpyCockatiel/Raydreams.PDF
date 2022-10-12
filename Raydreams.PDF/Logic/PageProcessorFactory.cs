@@ -42,18 +42,19 @@ namespace Raydreams.PDF
             return Facility.Unknown;
         }
 
-        /// <summary></summary>
+        /// <summary>Extract PDF Page blocks</summary>
         /// <param name="page"></param>
         /// <returns></returns>
+        /// <remarks>This holds the logic to decide what text is grouped together</remarks>
         public static IEnumerable<TextBlock> ExtractPageBlocks( Page page )
         {
             List<string> lines = new List<string>();
             var sb = new StringBuilder();
 
-            // 0. Preprocessing
+            // preprocessing
             var letters = page.Letters; // no preprocessing
 
-            // 1. Extract words
+            // extract words
             var wordExtractor = NearestNeighbourWordExtractor.Instance;
 
             var wordExtractorOptions = new NearestNeighbourWordExtractor.NearestNeighbourWordExtractorOptions()
@@ -99,13 +100,13 @@ namespace Raydreams.PDF
             // get all the words using the filters
             var words = wordExtractor.GetWords( letters );
 
-            // 2. Segment page
+            // segment page
             var pageSegmenter = DocstrumBoundingBoxes.Instance;
             var pageSegmenterOptions = new DocstrumBoundingBoxes.DocstrumBoundingBoxesOptions() { };
 
             IReadOnlyList<TextBlock> textBlocks = pageSegmenter.GetBlocks( words );
 
-            // 3. Postprocessing
+            // postprocessing
             var readingOrder = UnsupervisedReadingOrderDetector.Instance;
             IEnumerable<TextBlock> orderedTextBlocks = readingOrder.Get( textBlocks );
 

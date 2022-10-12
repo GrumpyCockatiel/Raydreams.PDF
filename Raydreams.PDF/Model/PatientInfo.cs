@@ -7,7 +7,8 @@ namespace Raydreams.PDF
     {
         Unknown = 0,
         MemorialHermann = 1,
-        Cornerstone = 2
+        Cornerstone = 2,
+        Kindred = 3
     }
 
     /// <summary>Patient Genetic Sex</summary>
