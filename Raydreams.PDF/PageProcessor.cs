@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using UglyToad.PdfPig.Content;
@@ -11,12 +12,14 @@ using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 
 namespace Raydreams.PDF
 {
-    /// <summary></summary>
+    /// <summary>Page Processor interface</summary>
     public interface IPageProcessor
     {
+        Facility Location { get; }
+
         string? ExtractName();
 
-        DateTimeOffset? ExtractDOB();
+        DateTime? ExtractDOB();
     }
 
     /// <summary></summary>
@@ -125,7 +128,7 @@ namespace Raydreams.PDF
         }
     }
 
-    /// <summary></summary>
+    /// <summary>Base Parser</summary>
     public abstract class BasePageProcessor
     {
         protected List<string> lines = new List<string>();
@@ -144,41 +147,76 @@ namespace Raydreams.PDF
         }
     }
 
-    /// <summary></summary>
+    /// <summary>Cornerstone Parser</summary>
     public class CornerstonePageProcessor : BasePageProcessor, IPageProcessor
     {
         public CornerstonePageProcessor( IEnumerable<TextBlock> txt ) : base( txt )
         {
         }
 
-        public DateTimeOffset? ExtractDOB()
+        /// <summary></summary>
+        public Facility Location { get => Facility.Cornerstone; }
+
+        /// <summary></summary>
+        public DateTime? ExtractDOB()
         {
-            throw new NotImplementedException();
+            Regex dobPat = new Regex( @"xxx-xx-9999 (\d\d/\d\d/\d\d) ", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant );
+
+            foreach ( string line in lines )
+            {
+                Match match = dobPat.Match( line.Trim() );
+
+                if ( match.Success && match.Groups.Count > 1 )
+                {
+                    return ( DateTime.TryParse( match.Groups[1].Value, out DateTime dob ) ) ? dob : null;
+                }
+            }
+
+            return null;
         }
 
+        /// <summary></summary>
         public string? ExtractName()
         {
-            // find the Patient text block
+            // find the label text block
             var pBlock = blocks.Where( b => b.Text.Trim().Equals( "patient", StringComparison.InvariantCultureIgnoreCase ) );
 
+            // find the closet text block that comes after
             TextBlock? nameBlock = pBlock.First().JustUnder( this.blocks );
 
             return nameBlock?.Text;
         }
     }
 
-    /// <summary></summary>
+    /// <summary>Memorial Hermann Facesheet Parser</summary>
     public class MHPageProcessor : BasePageProcessor, IPageProcessor
     {
         public MHPageProcessor( IEnumerable<TextBlock> txt ) : base( txt )
         {
         }
 
-        public DateTimeOffset? ExtractDOB()
+        /// <summary></summary>
+        public Facility Location { get => Facility.MemorialHermann; }
+
+        /// <summary></summary>
+        public DateTime? ExtractDOB()
         {
-            throw new NotImplementedException();
+            Regex dobPat = new Regex( @"^dob: (\d\d/\d\d/\d{4})$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant );
+
+            foreach ( string line in lines )
+            {
+                Match match = dobPat.Match( line.Trim() );
+
+                if ( match.Success && match.Groups.Count > 1 )
+                {
+                    return ( DateTime.TryParse( match.Groups[1].Value, out DateTime dob ) ) ? dob : null;
+                }
+            }
+
+            return null;
         }
 
+        /// <summary></summary>
         public string? ExtractName()
         {
             Regex namePat = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant );
@@ -195,18 +233,14 @@ namespace Raydreams.PDF
         }
     }
 
-    /// <summary></summary>
+    /// <summary>Null Parser</summary>
     public class NullPageProcessor : IPageProcessor
     {
-        public DateTimeOffset? ExtractDOB()
-        {
-            throw new NotImplementedException();
-        }
+        public Facility Location { get => Facility.Unknown; }
 
-        public string? ExtractName()
-        {
-            return String.Empty;
-        }
+        public DateTime? ExtractDOB() => null;
+
+        public string? ExtractName() => null;
     }
 }
 

@@ -42,7 +42,7 @@ namespace Raydreams.PDF
         public string LastName { get; set; } = String.Empty;
 
         /// <summary></summary>
-        public DateTimeOffset? DOB { get; set; } = null;
+        public DateTime? DOB { get; set; } = null;
 
         /// <summary></summary>
         public Facility Location { get; set; } = Facility.Unknown;

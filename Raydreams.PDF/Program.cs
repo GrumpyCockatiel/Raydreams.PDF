@@ -75,7 +75,8 @@ namespace Raydreams.PDF
                     if ( curPatient != null )
                         patients.Add( curPatient );
 
-                    curPatient = new PatientInfo { Name = parser.ExtractName(), Location = type  };
+                    curPatient = new PatientInfo { Name = parser.ExtractName(), DOB = parser.ExtractDOB(), Location = type  };
+                    _ = 5;
                 }
                 else if ( curPageNum < 2)
                 {
