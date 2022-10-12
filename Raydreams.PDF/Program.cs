@@ -19,7 +19,7 @@ namespace Raydreams.PDF
         /// <summary></summary>
         public static readonly string BasePath = Path.Combine( DesktopPath, "Facesheets" );
 
-        public static readonly string[] Facesheets = new string[] { "Facesheets-5.pdf" };
+        public static readonly string[] Facesheets = new string[] { "Facesheets-6.pdf" };
 
         /// <summary>Main entry class</summary>
         /// <param name="args">any future command line args</param>
