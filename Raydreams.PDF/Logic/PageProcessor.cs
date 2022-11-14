@@ -111,17 +111,17 @@ namespace Raydreams.PDF
             return null;
         }
 
-        /// <summary></summary>
+        /// <summary>v a t i e n t Name: BUBBA, MACK</summary>
         public string? ExtractName()
         {
-            Regex namePat = new Regex( @"^Patient Name:([-,\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant );
+            Regex namePat = new Regex( @"^Patient Name:(.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant );
 
             foreach ( string line in lines )
             {
                 Match nameMatch = namePat.Match( line.Trim() );
 
                 if ( nameMatch.Success && nameMatch.Groups.Count > 1 )
-                    return nameMatch.Groups[1].Value;
+                    return nameMatch.Groups[1].Value.Clean();
             }
 
             return null;
@@ -138,6 +138,68 @@ namespace Raydreams.PDF
                 Match match = pattern.Match( line.Trim() );
 
                 if ( match.Success && match.Groups.Count > 1 )
+                    return match.Groups[1].Value.ParseSex();
+            }
+
+            return Sex.Undetermined;
+        }
+    }
+
+    /// <summary>Memorial Hermann Facesheet Parser</summary>
+    public class MethodistPageProcessor : BasePageProcessor, IPageProcessor
+    {
+        public MethodistPageProcessor(IEnumerable<TextBlock> txt) : base(txt)
+        {
+        }
+
+        /// <summary></summary>
+        public Facility Location { get => Facility.MemorialHermann; }
+
+        /// <summary></summary>
+        public DateTime? ExtractDOB()
+        {
+            Regex dobPat = new Regex(@"^dob: (\d\d/\d\d/\d{4})$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+
+            foreach (string line in lines)
+            {
+                Match match = dobPat.Match(line.Trim());
+
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    return (DateTime.TryParse(match.Groups[1].Value, out DateTime dob)) ? dob : null;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary></summary>
+        public string? ExtractName()
+        {
+            Regex namePat = new Regex(@"^Name:(.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+
+            foreach (string line in lines)
+            {
+                Match nameMatch = namePat.Match(line.Trim());
+
+                if (nameMatch.Success && nameMatch.Groups.Count > 1)
+                    return nameMatch.Groups[1].Value.Clean();
+            }
+
+            return null;
+        }
+
+        /// <summary></summary>
+        /// <returns></returns>
+        public Sex ExtractSex()
+        {
+            Regex pattern = new Regex(@"^Sex:([\w ]+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+
+            foreach (string line in lines)
+            {
+                Match match = pattern.Match(line.Trim());
+
+                if (match.Success && match.Groups.Count > 1)
                     return match.Groups[1].Value.ParseSex();
             }
 

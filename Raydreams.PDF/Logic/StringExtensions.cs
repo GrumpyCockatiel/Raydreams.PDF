@@ -102,6 +102,40 @@ namespace Raydreams.PDF
 
             return temp.ToString();
         }
+
+        /// <summary></summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string Clean( this string str )
+        {
+            char[] valid = new char[] { '-', ',' };
+
+            StringBuilder temp = new StringBuilder();
+
+            for ( int i = 0; i < str.Length; ++i )
+            {
+                if ( !Char.IsLetter( str[i] ) && !valid.Contains( str[i] ) && Char.IsWhiteSpace( str[i] ) )
+                    continue;
+
+                temp.Append( str[i] );
+            }
+
+            return temp.ToString().TrimConsecutive(true);
+        }
+
+        /// <summary>Test a string is nothing but letters and digits</summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsAlphanumeric( this string str )
+        {
+            return str.All( char.IsLetterOrDigit );
+        }
+
+        /// <summary>Cleans a string so that it only contains letters. No digits or spaces or special chars</summary>
+        public static string RemoveNonChar( this string str )
+        {
+            return new String( str.Where( Char.IsLetter ).ToArray() );
+        }
     }
 }
 

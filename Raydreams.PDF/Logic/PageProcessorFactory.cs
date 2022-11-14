@@ -18,6 +18,8 @@ namespace Raydreams.PDF
                 return new CornerstonePageProcessor( txt );
             else if ( location == Facility.MemorialHermann )
                 return new MHPageProcessor( txt );
+            else if (location == Facility.Methodist)
+                return new MethodistPageProcessor(txt);
 
             return new NullPageProcessor();
         }
@@ -37,6 +39,9 @@ namespace Raydreams.PDF
                     return Facility.Cornerstone;
                 else if ( line.Contains( "memorial", StringComparison.InvariantCultureIgnoreCase ) )
                     return Facility.MemorialHermann;
+                else if (line.Contains("methodist", StringComparison.InvariantCultureIgnoreCase))
+                    return Facility.Methodist;
+
             }
 
             return Facility.Unknown;

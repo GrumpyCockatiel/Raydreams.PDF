@@ -13,7 +13,7 @@ namespace Raydreams.PDF
         public static readonly string BasePath = Path.Combine( DesktopPath, "Facesheets" );
 
         /// <summary>Array of filenames to process</summary>
-        public static readonly string[] Facesheets = new string[] { "Facesheets-5.pdf" };
+        public static readonly string[] Facesheets = new string[] { "Facesheets-14.pdf" };
 
         /// <summary>Main entry class</summary>
         /// <param name="args">any future command line args</param>
@@ -135,7 +135,7 @@ namespace Raydreams.PDF
             Array.ForEach( pages, p => builder.AddPage( pdf, p ) );
 
             var fileBytes = builder.Build();
-            var output = Path.Combine(BasePath, $"{filename}.pdf" );
+            var output = Path.Combine( BasePath, "out", $"{filename}.pdf" );
             File.WriteAllBytes( output, fileBytes );
 
             Console.WriteLine( $"Wrote Facesheet for {filename}" );
