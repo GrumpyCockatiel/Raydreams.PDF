@@ -176,7 +176,9 @@ namespace Raydreams.PDF
         /// <summary></summary>
         public string? ExtractName()
         {
-            Regex namePat = new Regex(@"^Name:(.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+            // Maya, Delfina (MRN: 110302983) DOB: 1212411944
+
+            Regex namePat = new Regex( @"^\s*(\w[a-zA-Z,\- ]+)\s+\(MRN:", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
 
             foreach (string line in lines)
             {

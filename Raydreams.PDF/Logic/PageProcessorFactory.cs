@@ -33,6 +33,8 @@ namespace Raydreams.PDF
 
             foreach ( TextBlock block in txt )
             {
+                // Houston Methodlst Sugar Land Hospltal
+
                 string line = block.Text.Normalize( NormalizationForm.FormKC );
 
                 if ( line.Contains( "cornerstone", StringComparison.InvariantCultureIgnoreCase ) )
@@ -40,6 +42,8 @@ namespace Raydreams.PDF
                 else if ( line.Contains( "memorial", StringComparison.InvariantCultureIgnoreCase ) )
                     return Facility.MemorialHermann;
                 else if (line.Contains("methodist", StringComparison.InvariantCultureIgnoreCase))
+                    return Facility.Methodist;
+                else if ( line.Contains( "methodlst", StringComparison.InvariantCultureIgnoreCase ) )
                     return Facility.Methodist;
 
             }
